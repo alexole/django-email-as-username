@@ -37,7 +37,7 @@ def get_user(email, queryset=None):
     Note that email address matches are case-insensitive.
     """
     if queryset is None:
-        queryset = User.objects
+        queryset = get_user_custom_model_name().objects
     return queryset.get(username=_email_to_username(email))
 
 
@@ -48,7 +48,7 @@ def user_exists(email, queryset=None):
     """
     try:
         get_user(email, queryset)
-    except User.DoesNotExist:
+    except get_user_custom_model_name().DoesNotExist:
         return False
     return True
 
@@ -86,7 +86,7 @@ def create_superuser(email, password):
     Create a new superuser with the given email.
     Use this instead of `User.objects.create_superuser`.
     """
-    return User.objects.create_superuser(email, email, password)
+    return get_user_custom_model_name().objects.create_superuser(email, email, password)
 
 
 def migrate_usernames(stream=None, quiet=False):
@@ -100,7 +100,7 @@ def migrate_usernames(stream=None, quiet=False):
     # Check all users can be migrated before applying migration
     emails = set()
     errors = []
-    for user in User.objects.all():
+    for user in get_user_custom_model_name().objects.all():
         if not user.email:
             errors.append("Cannot convert user '%s' because email is not "
                           "set." % (user._username, ))
@@ -116,7 +116,7 @@ def migrate_usernames(stream=None, quiet=False):
         raise Exception('django-email-as-username migration failed.')
 
     # Can migrate just fine.
-    total = User.objects.count()
+    total = get_user_custom_model_name().objects.count()
     for user in User.objects.all():
         user.username = _email_to_username(user.email)
         user.save()
