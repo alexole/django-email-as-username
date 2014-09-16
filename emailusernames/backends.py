@@ -1,10 +1,7 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
-from django.db.models import get_model
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
-from emailusernames.utils import get_user
+from emailusernames.utils import get_user, get_user_custom_model_name
 
 
 class EmailAuthBackend(ModelBackend):
@@ -33,7 +30,5 @@ class EmailAuthBackend(ModelBackend):
     @property
     def user_class(self):
         if not hasattr(self, '_user_class'):
-            self._user_class = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
-            if not self._user_class:
-                raise ImproperlyConfigured('Could not get custom user model')
+            self._user_class = get_user_custom_model_name()
         return self._user_class

@@ -6,6 +6,17 @@ import sys
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError
+from django.conf import settings
+from django.db.models import get_model
+from django.core.exceptions import ImproperlyConfigured
+
+
+def get_user_custom_model_name():
+    m = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
+
+    if not m:
+        raise ImproperlyConfigured('Could not get custom user model')
+    return m
 
 
 # We need to convert emails to hashed versions when we store them in the
@@ -54,7 +65,7 @@ def create_user(email, password=None, is_staff=None, is_active=None):
     Use this instead of `User.objects.create_user`.
     """
     try:
-        user = User.objects.create_user(email, email, password)
+        user = get_user_custom_model_name().objects.create_user(email, email, password)
     except IntegrityError, err:
         regexp = '|'.join(re.escape(e) for e in _DUPLICATE_USERNAME_ERRORS)
         if re.match(regexp, err.message):
