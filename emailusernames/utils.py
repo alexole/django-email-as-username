@@ -12,10 +12,12 @@ from django.core.exceptions import ImproperlyConfigured
 
 
 def get_user_custom_model_name():
-    m = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
-
-    if not m:
-        raise ImproperlyConfigured('Could not get custom user model')
+    if hasattr(settings, 'CUSTOM_USER_MODEL'):
+        m = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
+        if not m:
+            raise ImproperlyConfigured('Could not get custom user model')
+    else:
+        m = User
     return m
 
 
