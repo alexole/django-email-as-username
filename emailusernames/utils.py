@@ -7,13 +7,22 @@ import sys
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.conf import settings
-from django.db.models import get_model
 from django.core.exceptions import ImproperlyConfigured
 
 
 def get_user_custom_model_name():
     if hasattr(settings, 'CUSTOM_USER_MODEL'):
-        m = get_model(*settings.CUSTOM_USER_MODEL.split('.', 2))
+        params = settings.CUSTOM_USER_MODEL.split('.', 2)
+
+        try:
+            # django >= 1.7
+            from django.apps import apps
+            m = apps.get_model(*params)
+        except ImportError:
+            # django < 1.7
+            from django.db.models import get_model
+            m = get_model(*params)
+
         if not m:
             raise ImproperlyConfigured('Could not get custom user model')
     else:
